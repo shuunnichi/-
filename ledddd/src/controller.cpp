@@ -7,11 +7,10 @@ int leftJoystickY = 0;
 int rightJoystickX = 0;
 int lefts = 0;
 int rigts = 0;
-extern CAN can;
 
 // CANインスタンスの定義
 // CAN can(PA_11, PA_12, (int)1e6);
-// extern CAN can; // CANインスタンスの外部宣言
+extern CAN can; // CANインスタンスの外部宣言
 
 
 // FirstPenguinクラスのインスタンスの定義
@@ -147,5 +146,13 @@ void processInput(char *output_buf)
     else if  (strncmp(output_buf, "stop", 4) == 0)
     {
     }
-    
+    else if  (strncmp(output_buf, "left" , 4) == 0)
+    {
+    }
+    else if  (strncmp(output_buf, "right" , 5) == 0)
+    {
+    }   
+    else if  (strncmp(output_buf, "stop" , 4) == 0)
+    {
+    }
 }

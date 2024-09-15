@@ -1,25 +1,28 @@
 #include "mbed.h"
 #include "controller.hpp"
-#include "canSend.hpp"
+// #include "canSend.hpp"
 #include "firstpenguin.hpp"
-#include "PID.hpp"
 
 extern int leftJoystickX;
 extern int leftJoystickY;
 extern int rightJoystickX;
-extern int lefts;
+extern int lefts; 
 extern int rigts;
-extern FirstPenguin penguin; // FirstPenguinクラスのインスタンス
-// extern CAN can; // CANインスタンスの外部宣言
 
+extern FirstPenguin penguin; // FirstPenguinクラスのインスタンス
+int16_t output;
+
+CANMessage msg0;
+CANMessage msg1;
 
 BufferedSerial pc(USBTX, USBRX, 250000); // Serial communication with the PC
-CAN can(PA_11, PA_12, (int)1e6);
+CAN can(PA_11, PA_12, (int)1e6); 
+CAN can1(PA_11, PA_12, (int)1e6);
 CAN can2(PB_12, PB_13, (int)1e6);
 uint8_t DATA[8] = {};
 constexpr uint32_t can_id = 30;
 
-int maxspeed = 10000;
+int maxspeed = 10000; // maxspeedをグローバル変数として宣言
 
 void readUntilPipe(char *output_buf, int output_buf_size)
 {
@@ -44,24 +47,14 @@ void readUntilPipe(char *output_buf, int output_buf_size)
                 }
             }
         }
-        if (output_buf_index >= output_buf_size - 1) // Prevent buffer overflow
-        {
-            output_buf[output_buf_index] = '\0';
-            return;
-        }
     }
 }
 
-
-int main()
+void CANSend()
 {
     while (1)
     {
-        char output_buf[20];                           // 出力用のバッファを作成します
-        readUntilPipe(output_buf, sizeof(output_buf)); // '|'が受け取られるまでデータを読み込みます
-        processInput(output_buf);
-
-        int16_t output = lefts;
+        output = lefts;
         DATA[0] = output >> 8; // Big-endian conversion
         DATA[1] = output;
         DATA[2] = output >> 8; // Big-endian conversion
@@ -83,18 +76,32 @@ int main()
         DATA[7] = -output;
         CANMessage msg1(0x1FF, DATA, 8);
 
-
-        penguin.pwm[0] = leftJoystickX+leftJoystickY+rightJoystickX;
-        penguin.pwm[1] = leftJoystickX-leftJoystickY+rightJoystickX;
-        penguin.pwm[2] = -leftJoystickX-leftJoystickY+rightJoystickX;
-        penguin.pwm[3] = -leftJoystickY+leftJoystickX+rightJoystickX;
+        penguin.pwm[0] = leftJoystickX + leftJoystickY + rightJoystickX;
+        penguin.pwm[1] = leftJoystickX - leftJoystickY + rightJoystickX;
+        penguin.pwm[2] = -leftJoystickX - leftJoystickY + rightJoystickX;
+        penguin.pwm[3] = -leftJoystickY + leftJoystickX + rightJoystickX;
 
         if (penguin.pwm[0] > maxspeed) penguin.pwm[0] = maxspeed;
         if (penguin.pwm[1] > maxspeed) penguin.pwm[1] = maxspeed;
         if (penguin.pwm[2] > maxspeed) penguin.pwm[2] = maxspeed;
         if (penguin.pwm[3] > maxspeed) penguin.pwm[3] = maxspeed;
 
+        can1.write(msg0);
+        can2.write(msg1);
         penguin.send();
+        ThisThread::sleep_for(10ms);
+    }
+}
+
+int main()
+{
+    Thread thread1; // Threadインスタンスの宣言
+    thread1.start(CANSend); // thread1をCANSend関数で開始
+    while (1)
+    {
+        char output_buf[20];                           // 出力用のバッファを作成します
+        readUntilPipe(output_buf, sizeof(output_buf)); // '|'が受け取られるまでデータを読み込みます
+        processInput(output_buf);
     }
 }
 

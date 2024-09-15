@@ -1,8 +1,7 @@
-// canSend.hpp
-#ifndef CANSEND_HPP
-#define CANSEND_HPP
+// // canSend.hpp
+// #ifndef CANSEND_HPP
+// #define CANSEND_HPP
 
-void CANSend(); // 関数のプロトタイプ宣言
-void CANRead();
+// // void CANSend(); // 関数のプロトタイプ宣言
 
-#endif // CANSEND_HPP
+// #endif // CANSEND_HPP
