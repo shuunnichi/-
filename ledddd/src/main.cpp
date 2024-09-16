@@ -76,15 +76,16 @@ void CANSend()
         DATA[7] = -output;
         CANMessage msg1(0x1FF, DATA, 8);
 
-        penguin.pwm[0] = leftJoystickX + leftJoystickY + rightJoystickX;
-        penguin.pwm[1] = leftJoystickX - leftJoystickY + rightJoystickX;
-        penguin.pwm[2] = -leftJoystickX - leftJoystickY + rightJoystickX;
-        penguin.pwm[3] = -leftJoystickY + leftJoystickX + rightJoystickX;
+        penguin.pwm[0] = -leftJoystickX*0.2 - leftJoystickY*0.2 - rightJoystickX;
+        penguin.pwm[1] = leftJoystickX*0.2 - leftJoystickY*0.2 - rightJoystickX;
+        penguin.pwm[2] = leftJoystickX*0.2 + leftJoystickY*0.2 - rightJoystickX;
+        penguin.pwm[3] = leftJoystickY*0.2 - leftJoystickX*0.2 - rightJoystickX;
 
         if (penguin.pwm[0] > maxspeed) penguin.pwm[0] = maxspeed;
         if (penguin.pwm[1] > maxspeed) penguin.pwm[1] = maxspeed;
         if (penguin.pwm[2] > maxspeed) penguin.pwm[2] = maxspeed;
         if (penguin.pwm[3] > maxspeed) penguin.pwm[3] = maxspeed;
+        printf("penguin.pwm[0] = %d, penguin.pwm[1] = %d, penguin.pwm[2] = %d, penguin.pwm[3] = %d\n", penguin.pwm[0], penguin.pwm[1], penguin.pwm[2], penguin.pwm[3]);
 
         can1.write(msg0);
         can2.write(msg1);
@@ -136,4 +137,3 @@ int main()
 //     {
 //         rigts = 0;
 //     }
-
